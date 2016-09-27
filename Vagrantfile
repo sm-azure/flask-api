@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
   #config.vm.box = "ubuntu/trusty64"
-  config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "boxcutter/ubuntu1404"
 
 
   # Disable automatic box update checking. If you disable this, then
@@ -81,6 +81,5 @@ Vagrant.configure("2") do |config|
    #sudo apt-get install -y git
    curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
    python get-pip.py
-   pip install openpyxl
   SHELL
 end
