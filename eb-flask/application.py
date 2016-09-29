@@ -39,17 +39,25 @@ def index():
 @application.route('/hello')
 @auth.login_required
 def hello_world():
-    return 'Hello, World!'
+    token = g.user.generate_auth_token()
+    return jsonify({'message':'Hello, %s' % g.user.email},{ 'token': token.decode('ascii') })
 
 @application.route('/post/<int:post_id>')
 def post(post_id):
     return 'Post %d' % post_id
 
 @auth.verify_password
-def verify_password(email, password):
-    user = User.query.filter_by(email = email).first()
-    if not user or not user.verify_password(password):
-        return False
+def verify_password(email_or_token, password):
+    # try token verification
+    print 'Trying token verification'
+    user = User.verify_auth_token(email_or_token)
+    if not user:
+        # try with email verification
+        print 'Trying email verification'
+        user = User.query.filter_by(email = email_or_token).first()
+        if not user or not user.verify_password(password):
+            return False
+    print 'Setting user'
     g.user = user
     return True
 
