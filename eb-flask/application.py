@@ -1,4 +1,4 @@
-from flask import Flask, abort, request, jsonify, g, url_for
+from flask import Flask, abort, request, jsonify, g, url_for, Response
 from flask_sqlalchemy import SQLAlchemy
 from model.billingmodel import db
 from model.billingmodel import User, ManagedAccount, VPNTunnel
@@ -40,7 +40,10 @@ def index():
 @auth.login_required
 def hello_world():
     token = g.user.generate_auth_token()
-    return jsonify({'message':'Hello, %s' % g.user.email},{ 'token': token.decode('ascii') })
+    #return jsonify({'message':'Hello, %s' % g.user.email},{ 'token': token.decode('ascii') })
+    resp =  Response(response=jsonify({'message':'Hello, %s' % g.user.email}), status=200)
+    resp.headers['api-key']= token.decode('ascii')
+    return resp
 
 @application.route('/post/<int:post_id>')
 def post(post_id):
