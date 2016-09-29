@@ -16,9 +16,11 @@ class User(db.Model):
         self.email = email
 
     def hash_password(self, password):
+        print password
         self.password_hash = pwd_context.encrypt(password)
 
-    def verify_password(self, pasword):
+    def verify_password(self, password):
+        print password
         return pwd_context.verify(password, self.password_hash)
 
     def __repr__(self):

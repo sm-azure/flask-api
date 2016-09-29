@@ -2,8 +2,11 @@ from flask import Flask, abort, request, jsonify, g, url_for
 from flask_sqlalchemy import SQLAlchemy
 from model.billingmodel import db
 from model.billingmodel import User, ManagedAccount, VPNTunnel
+from flask_httpauth import HTTPBasicAuth
+
 
 application = Flask(__name__)
+auth = HTTPBasicAuth()
 
 @application.route('/api/users', methods = ['POST'])
 def new_user():
@@ -32,7 +35,9 @@ def get_user(id):
 def index():
     return 'Index Page'
 
+
 @application.route('/hello')
+@auth.login_required
 def hello_world():
     return 'Hello, World!'
 
@@ -40,8 +45,15 @@ def hello_world():
 def post(post_id):
     return 'Post %d' % post_id
 
+@auth.verify_password
+def verify_password(email, password):
+    user = User.query.filter_by(email = email).first()
+    if not user or not user.verify_password(password):
+        return False
+    g.user = user
+    return True
 
 if __name__ == '__main__':
-    application.debug = True
+    #application.debug = True
     application.run(host='0.0.0.0', port=3000)
     #application.run()
