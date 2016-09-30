@@ -1,16 +1,4 @@
-awsebcli==3.7.8
-backports.ssl-match-hostname==3.5.0.1
-blessed==1.9.5
-botocore==1.4.56
-cement==2.8.2
-click==6.6
-colorama==0.3.7
-docker-py==1.7.2
-dockerpty==0.4.1
-docopt==0.6.2
-docutils==0.12
 Flask==0.11.1
-Flask-HTTPAuth==3.2.1
 Flask-SQLAlchemy==2.1
 itsdangerous==0.24
 Jinja2==2.8
