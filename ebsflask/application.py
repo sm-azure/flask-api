@@ -6,8 +6,8 @@ from routes.views import apis
 from routes.views2 import posts
 
 from flask_login import LoginManager, login_required, logout_user, login_user, current_user
-from logging.handlers import RotatingFileHandler
-import logging
+from logging.handlers import StreamHandler
+import logging, sys
 import base64
 
 
@@ -28,8 +28,8 @@ def create_app():
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
     logger.setLevel(logging.DEBUG)
     #handler = RotatingFileHandler('/home/vagrant/opt/python/log/application.log', maxBytes=1024,backupCount=5)
-    handler = RotatingFileHandler('/opt/python/log/application.log', maxBytes=1024,backupCount=5)
-    #handler = RotatingFileHandler('/var/log/application.log', maxBytes=1024,backupCount=5)
+    handler = StreamHandler(sys.stdout)
+    #handler = StreamHandler('/var/app/current/log/application.log', maxBytes=1024,backupCount=5)
     handler.setFormatter(formatter)
     app.logger.addHandler(handler)
 
@@ -45,8 +45,8 @@ def load_user_from_request(request):
     # try token verification from headers
     token = request.headers.get('api_key')
     if token:
-        logger.debug('Got api-key token')
-        logger.debug(token)
+        logger.error('Got api-key token')
+        logger.error(token)
         user = User.verify_auth_token(token)
         # token is valid and user is already logged in - continue
         if user and user.is_authenticated():
@@ -62,16 +62,16 @@ def load_user_from_request(request):
     # try Basic authentication [for initial login]
     token = request.headers.get('Authorization')
     if token:
-        logger.debug('Got Authorization token')
-        logger.debug(token)
+        logger.error('Got Authorization token')
+        logger.error(token)
         token = token.replace('Basic ', '', 1)
         try:
             token = base64.b64decode(token)
         except TypeError:
             return None
         email, password = token.split(":")
-        logger.debug(email)
-        logger.debug(password)
+        logger.error(email)
+        logger.error(password)
         user = User.query.filter_by(email = email).first()
         if not user or not user.verify_password(password):
             return None
@@ -85,9 +85,10 @@ def load_user_from_request(request):
 
     return None
 
+# ebs requires application to be made available by default
+application = create_app()
 
 if __name__ == '__main__':
-    application = create_app()
     application.debug = True
-    application.run(host='0.0.0.0', port=3000)
-    #application.run()
+    #application.run(host='0.0.0.0', port=3000)
+    application.run()
