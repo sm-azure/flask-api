@@ -17,27 +17,27 @@ login_manager = LoginManager()
 def create_app():
 
     # app and db initialization
-    application = Flask(__name__)
-    application.config.from_object('config')
-    db.init_app(application)
+    app = Flask(__name__)
+    app.config.from_object('config')
+    db.init_app(app)
 
     # login manager
-    login_manager.init_app(application)
+    login_manager.init_app(app)
 
     # setup logging
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
     logger.setLevel(logging.DEBUG)
-    handler = RotatingFileHandler('/home/vagrant/opt/python/log/application.log', maxBytes=1024,backupCount=5)
-    #handler = RotatingFileHandler('/opt/python/log/application.log', maxBytes=1024,backupCount=5)
+    #handler = RotatingFileHandler('/home/vagrant/opt/python/log/application.log', maxBytes=1024,backupCount=5)
+    handler = RotatingFileHandler('/opt/python/log/application.log', maxBytes=1024,backupCount=5)
     #handler = RotatingFileHandler('/var/log/application.log', maxBytes=1024,backupCount=5)
     handler.setFormatter(formatter)
-    application.logger.addHandler(handler)
+    app.logger.addHandler(handler)
 
     # register the blueprints after login manager
-    application.register_blueprint(apis)
-    application.register_blueprint(posts)
+    app.register_blueprint(apis)
+    app.register_blueprint(posts)
 
-    return application
+    return app
 
 
 @login_manager.request_loader
@@ -87,6 +87,7 @@ def load_user_from_request(request):
 
 
 if __name__ == '__main__':
-    #application.debug = True
-    create_app().run(host='0.0.0.0', port=3000)
+    application = create_app()
+    application.debug = True
+    application.run(host='0.0.0.0', port=3000)
     #application.run()
