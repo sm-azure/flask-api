@@ -1,16 +1,16 @@
-from flask import Blueprint
+from flask import Blueprint, current_app
 from flask import abort, request, jsonify, g, url_for, Response, json
-from flask_login import LoginManager, login_required, logout_user, login_user, current_user
-#import base64
 
 from model.database import db
 from model.user import User
+from utils.security import login_manager, login_required, login_required, logout_user, login_user, current_user
 
 apis = Blueprint("api", __name__, url_prefix="/api")
 
 @apis.route('/users', methods = ['POST'])
 def new_user():
     print request
+    current_app.logger.error("Error---1")
     email = request.json.get('email')
     password = request.json.get('password')
     if email is None or password is None:
@@ -28,6 +28,7 @@ def new_user():
 
 @apis.route('/users/<int:id>')
 def get_user(id):
+    current_app.logger.error("Error---2")
     user = User.query.get(id)
     if not user:
         abort(400)
@@ -36,6 +37,7 @@ def get_user(id):
 
 @apis.route('/')
 def index():
+    current_app.logger.error("Error---3")
     return 'Index Page'
 
 

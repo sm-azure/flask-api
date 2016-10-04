@@ -1,18 +1,12 @@
 from flask import Flask
 
 from model.database import db
-from model.user import User
 from routes.views import apis
 from routes.views2 import posts
+from utils.security import login_manager
 
-from flask_login import LoginManager, login_required, logout_user, login_user, current_user
-from logging.handlers import StreamHandler
-import logging, sys
-import base64
-
-
-logger = logging.getLogger(__name__)
-login_manager = LoginManager()
+from logging.handlers import RotatingFileHandler
+import logging
 
 def create_app():
 
@@ -25,65 +19,22 @@ def create_app():
     login_manager.init_app(app)
 
     # setup logging
-    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s' '[in %(pathname)s:%(lineno)d]')
     #handler = RotatingFileHandler('/home/vagrant/opt/python/log/application.log', maxBytes=1024,backupCount=5)
-    handler = StreamHandler(sys.stdout)
-    #handler = StreamHandler('/var/app/current/log/application.log', maxBytes=1024,backupCount=5)
+    handler = RotatingFileHandler('/opt/python/log/application.log', maxBytes=1024,backupCount=5)
+    handler.setLevel(logging.DEBUG)
     handler.setFormatter(formatter)
+
     app.logger.addHandler(handler)
+    app.logger.setLevel(logging.DEBUG)
+
+    app.logger.error("Blah blah")
 
     # register the blueprints after login manager
     app.register_blueprint(apis)
     app.register_blueprint(posts)
 
     return app
-
-
-@login_manager.request_loader
-def load_user_from_request(request):
-    # try token verification from headers
-    token = request.headers.get('api_key')
-    if token:
-        logger.error('Got api-key token')
-        logger.error(token)
-        user = User.verify_auth_token(token)
-        # token is valid and user is already logged in - continue
-        if user and user.is_authenticated():
-            #login_user(user)
-            return user
-        # token is invalid (experied/incorrect) and user is logged in - logout
-        if not user and user.is_authenticated():
-            user.authenticated = False
-            db.session.add(user)
-            db.session.commit()
-            return None
-
-    # try Basic authentication [for initial login]
-    token = request.headers.get('Authorization')
-    if token:
-        logger.error('Got Authorization token')
-        logger.error(token)
-        token = token.replace('Basic ', '', 1)
-        try:
-            token = base64.b64decode(token)
-        except TypeError:
-            return None
-        email, password = token.split(":")
-        logger.error(email)
-        logger.error(password)
-        user = User.query.filter_by(email = email).first()
-        if not user or not user.verify_password(password):
-            return None
-        # User exists and is logging in - save state
-        user.authenticated = True
-        db.session.add(user)
-        db.session.commit()
-        logger.debug('Setting user')
-        #login_user(user)
-        return user
-
-    return None
 
 # ebs requires application to be made available by default
 application = create_app()
